@@ -1,3 +1,21 @@
+   .center {
+    margin: auto;
+    width: 18%;
+    border: 2px solid rgb(0, 0, 0);
+    padding: 30px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    background-color: #f7fbfc;
+    border-radius: 15px 15px 15px 15px;
+  }
+
+  .row {
+
+    width: 300px;
+
+  }
   .container {
     height: 100%;
     width: 100%;
