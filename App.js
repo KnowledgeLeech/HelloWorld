@@ -3,20 +3,25 @@ import Select from 'react-select';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Button from '@material-ui/core/Button';
-//import Popup from "reactjs-popup";
 import ModalPopup from './Components/ModalPopup';
 import './App.css';
 import FileInput from "./Components/FileInput";
-import Background from './IMGs/background31.jpg';
+import Background from './IMGs/background4.jpg';
 
 //npm lib for popups - https://www.npmjs.com/package/reactjs-popup
 //import Popup from "reactjs-popup";
-
 //import ModalPopup from './Popup/ModalPopup.js';
+//import Popup from "reactjs-popup";
+
+import { makeStyles } from '@material-ui/core/styles';
+import AppBar from '@material-ui/core/AppBar';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
  
 class App extends Component {
  
   state = {
+
     appidItems: [
       { label: "ADPTA", value: 1 },
       { label: "WFNPortal", value: 2 },
@@ -24,32 +29,51 @@ class App extends Component {
       { label: "TMS", value: 4 },
       { label: "ECE (ADPHC/ACA)", value: 5 },
     ],
+
     environmentItems: [],
+
     originItems: [
       { label: "CURR", value: 1 },
       { label: "NEXT", value: 2 },
     ],
+
     targetItems: [
       { label: "CURR", value: 1 },
       { label: "NEXT", value: 2 },
     ],
- 
+
+    typeItems: [
+      { label: "PILOT", value: 1 },
+      { label: "GA", value: 2 },
+    ],
+
     selectedAppid: '',
     selectedEnvironment: '',
     selectedOrigin: '',
     selectedTarget: '',
     selectedDate: '',
+    selectedType: '',
     
     instructionsFile: '',
     rollbackFile: '',
 
     popUpDisabled: true,
+
+    appIdButton: 0,  // 1- others 2- WFN
+    envButton: 0,
+    originButton: 0,
+    targetButton: 0,
+    dateButton: 0,
+    typeButton: 0,  // 1- Pilot 2- GA
+    datapodsButton: 0,
+    generateButton: 0,
   }
  
   handleAppId = (selectedOption) => {
  
     this.setState({selectedAppid: selectedOption}, this.setTextContent);
     this.setState({selectedEnvironment: ''});
+    this.setState({envButton: 1});
  
     if (selectedOption.label === "WFNPortal"){
       this.setState(
@@ -58,6 +82,9 @@ class App extends Component {
           { label: "UAT1", value: 2 },
           { label: "PROD2", value: 3 },
         ]}
+      );
+      this.setState(
+        {appIdButton: 2}
       );
     }
     else {
@@ -68,20 +95,34 @@ class App extends Component {
           { label: "PROD1", value: 3 }, 
         ]}
       );
+      this.setState(
+        {appIdButton: 1}
+      );
     }
     console.log(selectedOption.label);
+    console.log(this.state.appIdButton);
   }
  
   handleEnvironment = (selectedOption) => {
     this.setState({selectedEnvironment: selectedOption}, this.setTextContent);
     this.setState({resetButton: false});
- 
+
+    this.setState(
+      {originButton: 1}
+    );
+
     console.log(selectedOption.label);
+    console.log(this.state.origindButton);
+
   }
  
   handleOrigin = (selectedOption) => {
  
     this.setState({selectedOrigin: selectedOption});
+
+    this.setState(
+      {targetButton: 1}
+    );
 
     if (selectedOption.label === this.state.selectedTarget.label){
       this.setState({selectedTarget: ''});
@@ -94,21 +135,38 @@ class App extends Component {
       this.setState({targetItems: [{ label: "CURR", value: 1 }]});
     }
     console.log(selectedOption.label);
+    console.log(this.state.targetButton);
   }
  
   handleTarget = (selectedOption) => {
  
     this.setState({selectedTarget: selectedOption}, this.setTextContent);
+
+    this.setState({dateButton: 1});
       
     console.log(selectedOption.label);
+    console.log(this.state.dateButton);
+  }
+
+  handleType = (selectedOption) => {
+ 
+    this.setState({selectedType: selectedOption}, this.setTextContent);
+
+    //this.setState({dateButton: 1});
+      
+    console.log(selectedOption.label);
+    //console.log(this.state.dateButton);
   }
  
   handleDate = (selectedDate) => {
  
     this.setState({selectedDate: selectedDate}, this.setTextContent);
 
+    this.setState({typeButton: 1});
+
     console.log(this.getFormattedDate(selectedDate));
     console.log(selectedDate);
+    console.log(this.state.typeButton);
   }
  
   getFormattedDate = (date) => {
@@ -229,7 +287,7 @@ class App extends Component {
     const date = this.state.selectedDate;
 
     if (appId !== "" && env !== "" && origin !== "" && date !== ""){
-      console.log (appId.label + ' - ' + env.label + ' - ' + origin.label + ' - ' + date);
+      console.log (appId.label + ' - ' + env.label + ' - ' + origin.label + ' - ' + this.getFormattedDate(date))
       this.setState({popUpDisabled: false});
       return true;
     }
@@ -275,51 +333,63 @@ class App extends Component {
       </div>
     );
  
-    const envDropdown = (
-      <div>
-        <strong>Environment:</strong> 
-        <Select
-          options={this.state.environmentItems}
-          onChange={this.handleEnvironment}
-          value={this.state.selectedEnvironment} />
-        <p></p>
-      </div>
-    );
- 
-    const originDropdown = (
-      <div>
-        <strong>From:</strong>
-        <Select
-          options={this.state.originItems}
-          onChange={this.handleOrigin}
-          value={this.state.selectedOrigin} />
-        <p></p>
-      </div>
-    );
- 
-    const targetDropdown = (
-      <div>
-        <strong>To:</strong>
-        <Select
-          options={this.state.targetItems}
-          onChange={this.handleTarget}
-          value={this.state.selectedTarget} /> 
-        <p></p>
-      </div>
-    );
- 
-    const datePicker = (
-      <div>
-        <strong>Migration Date:</strong>
+    let envDropdown = null;
+    if(this.state.envButton === 1) {
+      envDropdown = (
         <div>
-          <DatePicker
-            minDate={new Date()}
-            selected={this.state.selectedDate}
-            onChange={this.handleDate} />
+          <strong>Environment:</strong> 
+          <Select
+            options={this.state.environmentItems}
+            onChange={this.handleEnvironment}
+            value={this.state.selectedEnvironment} />
+          <p></p>
         </div>
-        <p></p>
-      </div>
-    );
+      );
+    }
+ 
+    let originDropdown = null;
+    if(this.state.originButton === 1) {
+      originDropdown = (
+        <div>
+          <strong>From:</strong>
+          <Select
+            options={this.state.originItems}
+            onChange={this.handleOrigin}
+            value={this.state.selectedOrigin} />
+          <p></p>
+        </div>
+      );
+    }
+ 
+    let targetDropdown = null;
+    if(this.state.targetButton === 1) {
+      targetDropdown = (
+        <div>
+          <strong>To:</strong>
+          <Select
+            options={this.state.targetItems}
+            onChange={this.handleTarget}
+            value={this.state.selectedTarget} /> 
+          <p></p>
+        </div>
+      );
+    }
+ 
+    let datePicker = null;
+    if(this.state.dateButton === 1) {
+      datePicker = (
+        <div>
+          <strong>Date:</strong>
+          <div>
+            <DatePicker
+              minDate={new Date()}
+              selected={this.state.selectedDate}
+              onChange={this.handleDate} />
+          </div>
+          <p></p>
+        </div>
+      );
+    }
  
     const fileInput = (
       <div>
@@ -328,6 +398,20 @@ class App extends Component {
         <br/>
       </div>
     );
+
+    let typeDropdown = null;
+    if(this.state.typeButton === 1) {
+      typeDropdown = (
+        <div>
+          <strong>Type:</strong>
+          <Select
+            options={this.state.typeItems}
+            onChange={this.handleType}
+            value={this.state.selectedType} /> 
+          <p></p>
+        </div>
+      );
+    }
 
     const resetButton = (            
       <Button          
@@ -366,19 +450,15 @@ class App extends Component {
     return (
       <section style={ sectionStyle }>
         <div>
-          <div className="container">
+          <br/><br/><br/><br/><br/><br/><br/>     
+          <div className="center">
             <div className="row">
-                <h1 text-align= "center">Client Move</h1>
-                <br/>
                 {appIdDropdown}
                 {envDropdown}
                 {originDropdown}
                 {targetDropdown}
                 {datePicker}
-                {fileInput}
-                {InstructionsPopupButton}
-                &nbsp;
-                {resetButton}
+                {typeDropdown}
             </div>
           </div>
         </div>
