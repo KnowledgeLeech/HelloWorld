@@ -21,15 +21,15 @@ const CustomModal = (props) => {
             <div className="header"> MOVE INSTRUCTIONS </div>
             <div className="content">
                 <br/>
-                {props.file1}
+                {props.instructionsFiles}
                 <br/><br/>
                 <a onClick={props.onClick1} href="#">Move Instructions.txt</a>
                 <br/><br/>
-            </div>          
+            </div>
             <div className="header"> ROLLBACK INSTRUCTIONS </div>
             <div className="content">
                 <br/>
-                {props.file2}
+                {props.rollbackFiles}
                 <br/><br/>
                 <a onClick={props.onClick2} href="#">Rollback Instructions.txt</a>
                 <br/><br/>
